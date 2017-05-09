@@ -10,6 +10,7 @@ import java.text.DateFormat;
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.Properties;
+import tweets.MongoLoader;
 
 /**
  * Created by Arturo on 07-05-2017.
@@ -17,9 +18,7 @@ import java.util.Properties;
 public class FeelmsIndexerMain {
 
     public static void main(String[] args) {
-        MongodbConnection mdc = new MongodbConnection();
-        mdc.getTweets();
-        /*
+        
         InputStream inputStream = null;
 
         try {
@@ -55,10 +54,12 @@ public class FeelmsIndexerMain {
                 }
             }
         }
-
+        //  (Nota del Gonzalo)
+        //  Esto lo voy a dejar con TestLoader() porque vas a trabajar con los datos
+        //  de prueba, pero hay que cambiarlo por el MongoLoader() después, eso.
         TweetIndexer indexer = new TweetIndexer(new TestLoader(), new TestSqlConnection());
         indexer.run();
-        */
+        
     }
 
 }

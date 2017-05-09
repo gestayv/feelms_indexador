@@ -5,17 +5,8 @@
  */
 package tweets;
 
-import com.mongodb.*;
-import com.mongodb.MongoClient;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.model.Projections;
-import com.mongodb.client.model.Filters;
-import static com.mongodb.client.model.Filters.*;
-import static com.mongodb.client.model.Projections.*;
-import com.mongodb.client.model.Sorts;
-import java.util.Arrays;
-import org.bson.*;
+import db.MongodbConnection;
+import db.Tweet;
 
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.StoredField;
@@ -33,23 +24,34 @@ import java.util.List;
  */
 public class MongoLoader implements TweetLoader{
     
+    //  Obtiene todos los tweets como un listado de tweets creados previamente
+    //  los que se añaden a un listado de documentos que serán indexados.
     @Override   
     public List<Document> getTweets() {
+            
+        //  Se obtiene el listado de tweets.
+        MongodbConnection mdc = new MongodbConnection();
+        List<Tweet> lt = mdc.getTweets();
+        
+        //  Se crea el listado de documentos
         List<Document> docs = new ArrayList<Document>();
         
-        Document tweet = new Document();
-        
-        Document docA = new Document();
-        docA.add(new StoredField("doc_id", "1"));
-        docA.add(new StoredField("tweet_id", "10"));
-        docA.add(new StoredField("user", "@cog"));
-        docA.add(new StoredField("name", "fugg"));
-        docA.add(new TextField("text", "La nueva star wars me vale madre", Store.NO));
-        docA.add(new StoredField("rt_count", "2"));
-        docA.add(new TextField("fecha", LocalDate.parse("2017-05-05").format(DateTimeFormatter.BASIC_ISO_DATE), Store.YES));
-        docA.add(new TextField("hashtags", " ", Store.NO));
-        
-        docs.add(tweet);
+        //  Se recorre el listado de tweets y se agregan a un documento
+        for (Tweet tw: lt) {
+            Document tweet = new Document();
+            
+            tweet.add(new StoredField("doc_id", tw.getId_doc()));
+            tweet.add(new StoredField("tweet_id", tw.getId_tweet()));
+            tweet.add(new StoredField("user", tw.getUser()));
+            tweet.add(new StoredField("name", tw.getName()));
+            tweet.add(new TextField("text", tw.getText(), Store.NO));
+            tweet.add(new StoredField("rt_count", tw.getRt_count()));
+            tweet.add(new TextField("fecha", LocalDate.parse(tw.getFecha()).format(DateTimeFormatter.BASIC_ISO_DATE), Store.YES));
+            tweet.add(new TextField("hashtags", tw.getHashtag(), Store.NO));
+            
+            //  Se agrega el documento a un listado
+            docs.add(tweet);
+        }
         
         return docs;
     }
