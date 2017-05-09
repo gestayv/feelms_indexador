@@ -6,10 +6,7 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
@@ -51,6 +48,8 @@ public class MySqlConnection implements SqlConnection {
             ds.setUrl("jdbc:mysql://" + host + ":" + port + "/" + db_name);
 
             this.dataSource = ds;
+        } else {
+            System.out.print("\nConectado al DataSource existente\n\n");
         }
 
 
@@ -87,7 +86,7 @@ public class MySqlConnection implements SqlConnection {
     @Override
     public List<Film> getFilms() throws SQLException {
         Connection conn = null;
-        Statement stm = null;
+        PreparedStatement stm = null;
         ResultSet rs = null;
 
         List<Film> films = null;
@@ -95,14 +94,14 @@ public class MySqlConnection implements SqlConnection {
         try {
             conn = dataSource.getConnection();
 
-            stm = conn.createStatement();
-            rs = stm.executeQuery("SELECT f.id, sub.last_update, k.term\n" +
+            stm = conn.prepareStatement("SELECT f.id, sub.last_update, k.term\n" +
                     "FROM films f\n" +
                     "INNER JOIN key_terms k\n" +
                     "ON f.id = k.film_id\n" +
                     "LEFT JOIN (SELECT film_id, MAX(date) as last_update FROM tweet_counts GROUP BY film_id) sub\n" +
                     "ON sub.film_id = k.film_id\n" +
                     "ORDER BY f.id");
+            rs = stm.executeQuery();
 
             List<Film> filmsAux = new ArrayList<Film>();
             Film lastFilm = null;
@@ -163,6 +162,12 @@ public class MySqlConnection implements SqlConnection {
 
     @Override
     public void writeData(List<TweetCount> data) {
+
+        //La query debe ser algo como
+        // INSERT INTO tweet_counts (date, count, film_id)
+        // VALUES ('YYYY-MM-DD', 100, 1), ('YYYY-MM-DD', 200, 1), (otra fila), (otra fila)
+        // Así para meter todos los valores de una
+
 
     }
 }
