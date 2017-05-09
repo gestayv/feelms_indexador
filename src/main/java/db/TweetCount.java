@@ -2,6 +2,7 @@ package db;
 
 import tweets.TweetLoader;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 /**
@@ -10,13 +11,13 @@ import java.util.Date;
 public class TweetCount {
 
     private int film_id;
-    private Date date;
+    private LocalDate date;
     private int count;
 
     private TweetCount() {
     }
 
-    public TweetCount(int film_id, Date date, int count) {
+    public TweetCount(int film_id, LocalDate date, int count) {
         this.film_id = film_id;
         this.date = date;
         this.count = count;
@@ -26,7 +27,7 @@ public class TweetCount {
         return film_id;
     }
 
-    public Date getDate() {
+    public LocalDate getDate() {
         return date;
     }
 

@@ -2,6 +2,7 @@ package indexer;
 
 import db.Film;
 import db.SqlConnection;
+import db.TweetCount;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.CharArraySet;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
@@ -20,6 +21,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalUnit;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -66,18 +68,21 @@ public class TweetIndexer {
 
             IndexSearcher indexSearcher = new IndexSearcher(indexReader);
 
-            //QueryBuilder builder = new QueryBuilder(analyzer);
+            //QueryBuilder queryBuilder = new QueryBuilder(analyzer);
+
+            List<TweetCount> tweetCounts = new ArrayList<TweetCount>();
 
             //Por cada film, empieza a buscar tweets
             for (Film film: films) {
-                
+
                 //Si la ultima actualizacion fue ayer o antes, busca.
                 if(film.getLastUpdate() == null || film.getLastUpdate().compareTo(LocalDate.now()) < 0) {
+
                     List<String> keyterms = film.getKeyterms();
                     BooleanQuery.Builder builder = new BooleanQuery.Builder();
 
                     for (String keyterm: keyterms) {
-                        String[] arr = keyterm.trim().split(" ");
+                        String[] arr = keyterm.toLowerCase().trim().split(" ");
                         if(arr.length == 1) {
                             BooleanClause bcText = new BooleanClause(new TermQuery(new Term("text", arr[0])), BooleanClause.Occur.SHOULD);
                             BooleanClause bcHash = new BooleanClause(new TermQuery(new Term("hashtags", arr[0])), BooleanClause.Occur.SHOULD);
@@ -117,35 +122,39 @@ public class TweetIndexer {
                     if(film.getLastUpdate() == null) {
                         beginPoint = LocalDate.now().minusDays(10);
                     } else {
-                        beginPoint = film.getLastUpdate();
+                        beginPoint = film.getLastUpdate().plusDays(1);
                     }
-                    LocalDate end = LocalDate.now().minusDays(1);;
+                    LocalDate end = LocalDate.now().minusDays(1);
 
-                    System.out.print("Movie Id: " + film.getId());
+                    System.out.print("\nMovie Id: " + film.getId() + "\n");
+                    System.out.print("Keyterms: " + film.getKeyterms() + "\n");
                     System.out.print("Begin: " + beginPoint.toString() + "\n");
-                    System.out.print("End: " + end.toString() + "\n");
+                    System.out.print("End: " + end.toString() + "\n\n");
 
-                    while(beginPoint.compareTo(end) <= 0) {
-                        //Copiar la query y agregarle fecha
-                        BooleanQuery.Builder queryCopy = new BooleanQuery.Builder();
-                        List<BooleanClause> clauses = query.clauses(); //Copiar clausulas para agregar la de fecha
-                        for(BooleanClause clause: clauses) {
-                            queryCopy.add(clause);
-                        }
+
+                    while(beginPoint.compareTo(end) < 0) {
+
+                        //Crea una super boolean query
+                        BooleanQuery.Builder auxQB = new BooleanQuery.Builder();
+                        auxQB.add(query, BooleanClause.Occur.MUST);
+
                         //Agrega la clausula con el dia, transforma el formato YYYY-MM-DD a yyyyMMdd que acepta el indexador
                         BooleanClause dateClause = new BooleanClause(new TermQuery(new Term("fecha", beginPoint.format(DateTimeFormatter.BASIC_ISO_DATE))), BooleanClause.Occur.MUST);
-                        queryCopy.add(dateClause);
+                        auxQB.add(dateClause);
 
                         //Realizar query
-                        int count = indexSearcher.count(queryCopy.build());
+                        int count = indexSearcher.count(auxQB.build());
 
-                        //Test
-                        System.out.print(beginPoint.toString() + " " + count + "\n");
+                        if(count > 0) {
+                            tweetCounts.add(new TweetCount(film.getId(), beginPoint, count));
+                        }
 
                         //Avanzar un dia
                         beginPoint = beginPoint.plusDays(1);
 
                     }
+
+
 
                     /* Codigo basura, borrar cuando no lo necesite
                     int count = indexSearcher.count(query); //Obtiene conteo de hits
@@ -163,11 +172,20 @@ public class TweetIndexer {
 
                     //Fin pruebas
                     */
+
+
                 }
 
             }
 
-
+            //Escribir Conteo
+            if(!tweetCounts.isEmpty()) {
+                System.out.print("\nEscribiendo conteos\n");
+                int filasAgregadas = sqlConn.writeData(tweetCounts);
+                System.out.print("Filas Agregadas: " + filasAgregadas + "\n");
+            } else {
+                System.out.print("\nSin conteos que escribir\n");
+            }
 
         } catch (IOException | SQLException e) {
             System.out.print(e);

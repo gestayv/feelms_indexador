@@ -24,8 +24,9 @@ public class TestSqlConnection implements SqlConnection {
     }
 
     @Override
-    public void writeData(List<TweetCount> data) {
+    public int writeData(List<TweetCount> data) {
 
+        return 0;
     }
 
 }

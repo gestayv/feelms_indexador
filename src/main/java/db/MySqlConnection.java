@@ -9,7 +9,6 @@ import javax.sql.DataSource;
 import java.sql.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -91,6 +90,8 @@ public class MySqlConnection implements SqlConnection {
 
         List<Film> films = null;
 
+        System.out.print("Obteniendo Films \n\n");
+
         try {
             conn = dataSource.getConnection();
 
@@ -132,8 +133,6 @@ public class MySqlConnection implements SqlConnection {
 
             films = filmsAux;
 
-            System.out.print("Call to GetFilms \n");
-
             /*
             //Solo para pruebas
             for(Film film: films) {
@@ -166,7 +165,7 @@ public class MySqlConnection implements SqlConnection {
     }
 
     @Override
-    public void writeData(List<TweetCount> data) throws SQLException {
+    public int writeData(List<TweetCount> data) throws SQLException {
 
         //La query debe ser algo como
         // INSERT INTO tweet_counts (date, count, film_id)
@@ -186,16 +185,18 @@ public class MySqlConnection implements SqlConnection {
                 StringBuilder queryValues = new StringBuilder();
                 queryValues.ensureCapacity(1200);
 
+                int updatedRows = 0;
+
                 for(TweetCount tw: data) {
 
                     if(queryValues.length() == 0) {
-                        queryValues.append(" (").append(tw.getDate().toString()).append(", ").append(tw.getCount()).append(", ").append(tw.getFilm_id()).append(")");
+                        queryValues.append(" (\'").append(tw.getDate().toString()).append("\', ").append(tw.getCount()).append(", ").append(tw.getFilm_id()).append(")");
                     } else if (queryValues.length() < 1000) {
-                        queryValues.append(", (").append(tw.getDate().toString()).append(", ").append(tw.getCount()).append(", ").append(tw.getFilm_id()).append(")");
+                        queryValues.append(", (\'").append(tw.getDate().toString()).append("\', ").append(tw.getCount()).append(", ").append(tw.getFilm_id()).append(")");
                     } else {
                         //Manda a la BD los datos que tiene por ahora
                         stm = conn.prepareStatement(queryBase + queryValues.toString());
-                        rs = stm.executeQuery();
+                        updatedRows += stm.executeUpdate();
 
                         if(rs != null && !rs.isClosed()) rs.close();
                         if(stm != null && !stm.isClosed()) stm.close();
@@ -208,8 +209,10 @@ public class MySqlConnection implements SqlConnection {
                 //Ingresa a la BD lo que falta
                 if(queryValues.length() > 0) {
                     stm = conn.prepareStatement(queryBase + queryValues.toString());
-                    rs = stm.executeQuery();
+                    updatedRows += stm.executeUpdate();
                 }
+
+                return updatedRows;
 
             } catch (SQLException e) {
                 throw e;
@@ -226,7 +229,7 @@ public class MySqlConnection implements SqlConnection {
 
         }
 
-
+        return 0;
 
 
 
