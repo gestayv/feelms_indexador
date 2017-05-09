@@ -70,7 +70,7 @@ public class TweetIndexer {
 
             //Por cada film, empieza a buscar tweets
             for (Film film: films) {
-
+                
                 //Si la ultima actualizacion fue ayer o antes, busca.
                 if(film.getLastUpdate() == null || film.getLastUpdate().compareTo(LocalDate.now()) < 0) {
                     List<String> keyterms = film.getKeyterms();

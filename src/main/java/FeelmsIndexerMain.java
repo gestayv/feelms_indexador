@@ -1,6 +1,7 @@
 
 import db.MySqlConnection;
 import db.TestSqlConnection;
+import db.MongodbConnection;
 import indexer.TweetIndexer;
 import tweets.TestLoader;
 
@@ -12,6 +13,7 @@ import java.text.DateFormat;
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.Properties;
+import tweets.MongoLoader;
 
 /**
  * Created by Arturo on 07-05-2017.
@@ -19,12 +21,12 @@ import java.util.Properties;
 public class FeelmsIndexerMain {
 
     public static void main(String[] args) {
-
+        
         InputStream inputStream = null;
 
         try {
             Properties prop = new Properties();
-            String propFileName = "app.properties";
+            String propFileName = "./src/main/resources/app.properties";
 
             inputStream = new FileInputStream(propFileName);
 
@@ -80,7 +82,6 @@ public class FeelmsIndexerMain {
 
             */
 
-
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
@@ -93,9 +94,11 @@ public class FeelmsIndexerMain {
             }
         }
 
+        //  (Nota del Gonzalo)
+        //  Esto lo voy a dejar con TestLoader() porque vas a trabajar con los datos
+        //  de prueba, pero hay que cambiarlo por el MongoLoader() después, eso.
         TweetIndexer indexer = new TweetIndexer(new TestLoader(), new TestSqlConnection());
         indexer.run();
-
 
     }
 
