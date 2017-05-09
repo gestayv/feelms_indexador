@@ -121,6 +121,7 @@ public class TweetIndexer {
                     }
                     LocalDate end = LocalDate.now().minusDays(1);;
 
+                    System.out.print("Movie Id: " + film.getId());
                     System.out.print("Begin: " + beginPoint.toString() + "\n");
                     System.out.print("End: " + end.toString() + "\n");
 

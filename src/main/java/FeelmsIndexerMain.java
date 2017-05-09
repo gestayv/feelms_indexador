@@ -46,7 +46,6 @@ public class FeelmsIndexerMain {
 
             System.out.print("\n");
 
-            /* Seccion de mysql y mierda varia, descomento cuando termine el MySqlConnection
 
             //Conexion MySQL
             MySqlConnection sqlconn = new MySqlConnection(mysql_username, mysql_password, mysql_host, mysql_port, mysql_db_name);
@@ -67,7 +66,7 @@ public class FeelmsIndexerMain {
 
                 //Realizar tareas
                 //ACA PONER TWEET INDEXER Y CADA COSA DENTRO DE UN TRY-CATCH
-                TweetIndexer indexer = new TweetIndexer(new TestLoader(), new TestSqlConnection());
+                TweetIndexer indexer = new TweetIndexer(new TestLoader(), sqlconn);
                 indexer.run();
 
             } else {
@@ -81,8 +80,6 @@ public class FeelmsIndexerMain {
 
                 System.out.print("Revisar excepciones correspondientes");
             }
-
-            */
 
 
 
@@ -98,10 +95,11 @@ public class FeelmsIndexerMain {
             }
         }
 
+        /*
         //Borrar esto despues, solo para pruebas
         TweetIndexer indexer = new TweetIndexer(new TestLoader(), new TestSqlConnection());
         indexer.run();
-
+        */
 
     }
 

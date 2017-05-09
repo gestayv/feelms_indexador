@@ -132,6 +132,9 @@ public class MySqlConnection implements SqlConnection {
 
             films = filmsAux;
 
+            System.out.print("Call to GetFilms \n");
+
+            /*
             //Solo para pruebas
             for(Film film: films) {
                 System.out.print("Id film: " + film.getId() + "\n");
@@ -145,28 +148,87 @@ public class MySqlConnection implements SqlConnection {
                 }
             }
 
+            */
+
 
 
         } catch (SQLException e) {
             throw e;
         } finally {
-            if(rs != null || !rs.isClosed()) rs.close();
+            if(rs != null && !rs.isClosed()) rs.close();
 
-            if(stm != null || !stm.isClosed()) stm.close();
+            if(stm != null && !stm.isClosed()) stm.close();
 
-            if(conn != null || !conn.isClosed()) conn.close();
+            if(conn != null && !conn.isClosed()) conn.close();
         }
 
         return films;
     }
 
     @Override
-    public void writeData(List<TweetCount> data) {
+    public void writeData(List<TweetCount> data) throws SQLException {
 
         //La query debe ser algo como
         // INSERT INTO tweet_counts (date, count, film_id)
         // VALUES ('YYYY-MM-DD', 100, 1), ('YYYY-MM-DD', 200, 1), (otra fila), (otra fila)
         // Así para meter todos los valores de una
+
+        if(!data.isEmpty()) {
+            Connection conn = null;
+            PreparedStatement stm = null;
+            ResultSet rs = null;
+
+            try {
+
+                conn = dataSource.getConnection();
+
+                String queryBase = "INSERT INTO tweet_counts (date, count, film_id) VALUES";
+                StringBuilder queryValues = new StringBuilder();
+                queryValues.ensureCapacity(1200);
+
+                for(TweetCount tw: data) {
+
+                    if(queryValues.length() == 0) {
+                        queryValues.append(" (").append(tw.getDate().toString()).append(", ").append(tw.getCount()).append(", ").append(tw.getFilm_id()).append(")");
+                    } else if (queryValues.length() < 1000) {
+                        queryValues.append(", (").append(tw.getDate().toString()).append(", ").append(tw.getCount()).append(", ").append(tw.getFilm_id()).append(")");
+                    } else {
+                        //Manda a la BD los datos que tiene por ahora
+                        stm = conn.prepareStatement(queryBase + queryValues.toString());
+                        rs = stm.executeQuery();
+
+                        if(rs != null && !rs.isClosed()) rs.close();
+                        if(stm != null && !stm.isClosed()) stm.close();
+
+                        //Vacia los valores de la query
+                        queryValues = new StringBuilder();
+                    }
+                }
+
+                //Ingresa a la BD lo que falta
+                if(queryValues.length() > 0) {
+                    stm = conn.prepareStatement(queryBase + queryValues.toString());
+                    rs = stm.executeQuery();
+                }
+
+            } catch (SQLException e) {
+                throw e;
+            } finally {
+                if(rs != null && !rs.isClosed()) rs.close();
+
+                if(stm != null && !stm.isClosed()) stm.close();
+
+                if(conn != null && !conn.isClosed()) conn.close();
+            }
+
+
+
+
+        }
+
+
+
+
 
 
     }
