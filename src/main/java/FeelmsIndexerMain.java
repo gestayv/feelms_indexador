@@ -1,4 +1,5 @@
 import db.TestSqlConnection;
+import db.MongodbConnection;
 import indexer.TweetIndexer;
 import tweets.TestLoader;
 
@@ -16,12 +17,14 @@ import java.util.Properties;
 public class FeelmsIndexerMain {
 
     public static void main(String[] args) {
-
+        MongodbConnection mdc = new MongodbConnection();
+        mdc.getTweets();
+        /*
         InputStream inputStream = null;
 
         try {
             Properties prop = new Properties();
-            String propFileName = "app.properties";
+            String propFileName = "./src/main/resources/app.properties";
 
             inputStream = new FileInputStream(propFileName);
 
@@ -41,9 +44,6 @@ public class FeelmsIndexerMain {
 
             System.out.print("\n");
 
-
-
-
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
@@ -56,9 +56,9 @@ public class FeelmsIndexerMain {
             }
         }
 
-
         TweetIndexer indexer = new TweetIndexer(new TestLoader(), new TestSqlConnection());
         indexer.run();
+        */
     }
 
 }
