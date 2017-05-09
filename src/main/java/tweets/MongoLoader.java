@@ -24,6 +24,15 @@ import java.util.List;
  */
 public class MongoLoader implements TweetLoader{
     
+    
+    
+    public boolean connectionStatus()
+    {
+        MongodbConnection mc = new MongodbConnection();
+        if(mc.mConnection() == null) return false;
+        return true;
+    }
+    
     //  Obtiene todos los tweets como un listado de tweets creados previamente
     //  los que se añaden a un listado de documentos que serán indexados.
     @Override   
@@ -31,7 +40,8 @@ public class MongoLoader implements TweetLoader{
             
         //  Se obtiene el listado de tweets.
         MongodbConnection mdc = new MongodbConnection();
-        List<Tweet> lt = mdc.getTweets();
+        
+        List<Tweet> lt = mdc.getTweets(mdc.mConnection());
         
         //  Se crea el listado de documentos
         List<Document> docs = new ArrayList<Document>();
