@@ -1,5 +1,6 @@
 package db;
 
+import java.sql.SQLException;
 import java.util.List;
 
 /**
@@ -7,7 +8,7 @@ import java.util.List;
  */
 public interface SqlConnection {
 
-    public List<Film> getFilms();
+    public List<Film> getFilms() throws SQLException;
 
     public void writeData(List<TweetCount> data);
 

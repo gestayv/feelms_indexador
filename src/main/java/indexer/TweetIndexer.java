@@ -15,6 +15,7 @@ import tweets.TweetLoader;
 import org.apache.lucene.document.Document;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
@@ -47,14 +48,21 @@ public class TweetIndexer {
         //Mientras, incluir stopwords
         Analyzer analyzer = new StandardAnalyzer(CharArraySet.EMPTY_SET);
         IndexWriterConfig iwc = new IndexWriterConfig(analyzer);
-        try (IndexWriter indexWriter = new IndexWriter(dir, iwc)) {
+
+        //Para cerrarlo en caso de exception
+        IndexWriter indexWriter = null;
+        IndexReader indexReader = null;
+
+        try {
+
+            indexWriter = new IndexWriter(dir, iwc);
 
             //Add documents
             indexWriter.addDocuments(docs);
 
             List<Film> films = sqlConn.getFilms();
 
-            IndexReader indexReader = DirectoryReader.open(indexWriter);
+            indexReader = DirectoryReader.open(indexWriter);
 
             IndexSearcher indexSearcher = new IndexSearcher(indexReader);
 
@@ -158,12 +166,24 @@ public class TweetIndexer {
 
             }
 
-            indexReader.close();
-            indexWriter.close();
 
 
-        } catch (IOException e) {
+        } catch (IOException | SQLException e) {
             System.out.print(e);
+        } finally {
+            if(indexWriter != null && indexWriter.isOpen()) {
+                try {
+                    indexWriter.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            if(indexReader != null) try {
+                indexReader.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
     }

@@ -32,7 +32,13 @@ public class Film {
         return keyterms;
     }
 
+    public void addKeyterm(String term) { this.keyterms.add(term); }
+
     public LocalDate getLastUpdate() {
         return lastUpdate;
+    }
+
+    public void setLastUpdate(LocalDate lastUpdate) {
+        this.lastUpdate = lastUpdate;
     }
 }

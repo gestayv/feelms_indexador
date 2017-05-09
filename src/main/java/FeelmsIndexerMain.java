@@ -1,3 +1,5 @@
+
+import db.MySqlConnection;
 import db.TestSqlConnection;
 import indexer.TweetIndexer;
 import tweets.TestLoader;
@@ -5,6 +7,7 @@ import tweets.TestLoader;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.SQLException;
 import java.text.DateFormat;
 import java.time.LocalDate;
 import java.util.Date;
@@ -41,7 +44,41 @@ public class FeelmsIndexerMain {
 
             System.out.print("\n");
 
+            /* Seccion de MySql y Mongo, no tocar. Se deja comentado hasta que termine de implementarlo a full. Aparte que requiere de BD MySQL instalada y cada cosa
 
+            //Conexion MySQL
+            MySqlConnection sqlconn = new MySqlConnection(mysql_username, mysql_password, mysql_host, mysql_port, mysql_db_name);
+            boolean SqlTest = sqlconn.test();
+
+            //Conexion MongoDB
+
+            boolean MongoTest = true; //Poner acá prueba de conexion de mongo
+
+            if (SqlTest && MongoTest) {
+                //Prueba SQL
+
+                try {
+                    sqlconn.getFilms();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+
+                //Realizar tareas
+                //ACA PONER TWEET INDEXER Y CADA COSA
+
+            } else {
+                if(!SqlTest) {
+                    System.out.print("Error de conexión de la base de datos MySQL\n");
+                }
+
+                if(!MongoTest) {
+                    System.out.print("Error de conexión de la base de datos MongoDB\n");
+                }
+
+                System.out.print("Revisar excepciones correspondientes");
+            }
+
+            */
 
 
         } catch (IOException e) {
@@ -56,9 +93,10 @@ public class FeelmsIndexerMain {
             }
         }
 
-
         TweetIndexer indexer = new TweetIndexer(new TestLoader(), new TestSqlConnection());
         indexer.run();
+
+
     }
 
 }
