@@ -8,6 +8,7 @@ package db;
 import com.mongodb.MongoClient;
 import com.mongodb.ServerAddress;
 import com.mongodb.MongoCredential;
+import com.mongodb.MongoException;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
@@ -24,7 +25,7 @@ import java.util.List;
  */
 public class MongodbConnection {
     
-    public MongoCollection<Document> mConnection()
+    public MongoClient mConnection()
     {
         //  Usuario
         String user = "admin";
@@ -38,7 +39,20 @@ public class MongodbConnection {
 
         MongoClient mcl = new MongoClient(new ServerAddress("localhost", 27017),
                                                     Arrays.asList(mcr));
-
+        try
+        {
+            mcl.listDatabases();
+        }
+        catch(MongoException me)
+        {
+            System.out.println(me);
+            return null;
+        }
+        return mcl;
+    }
+    
+    public MongoCollection<Document> getDocuments(MongoClient mcl)
+    {
         MongoDatabase db = mcl.getDatabase("feelms");
 
         MongoCollection<Document> mColl = db.getCollection("tweets");
@@ -46,9 +60,10 @@ public class MongodbConnection {
         return mColl;
     }
     
-    public List<Tweet> getTweets()
+    public List<Tweet> getTweets(MongoClient mcl)
     {
-        MongoCollection<Document> coll = mConnection();
+        
+        MongoCollection<Document> coll = getDocuments(mcl);
         List<Tweet> tweets = new ArrayList<Tweet>();
         MongoCursor<Document> cr = coll.find().iterator();
         while(cr.hasNext())
