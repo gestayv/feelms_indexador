@@ -27,7 +27,7 @@ public class FeelmsIndexerMain {
 
         try {
             Properties prop = new Properties();
-            String propFileName = "./src/main/resources/app.properties";
+            String propFileName = "app.properties";
 
             inputStream = new FileInputStream(propFileName);
 
@@ -47,7 +47,6 @@ public class FeelmsIndexerMain {
 
             System.out.print("\n");
 
-            /* Seccion de MySql y Mongo, no tocar. Se deja comentado hasta que termine de implementarlo a full. Aparte que requiere de BD MySQL instalada y cada cosa
 
             //Conexion MySQL
             MySqlConnection sqlconn = new MySqlConnection(mysql_username, mysql_password, mysql_host, mysql_port, mysql_db_name);
@@ -58,8 +57,8 @@ public class FeelmsIndexerMain {
             boolean MongoTest = true; //Poner acá prueba de conexion de mongo
 
             if (SqlTest && MongoTest) {
-                //Prueba SQL
 
+                //Prueba SQL
                 try {
                     sqlconn.getFilms();
                 } catch (SQLException e) {
@@ -67,7 +66,9 @@ public class FeelmsIndexerMain {
                 }
 
                 //Realizar tareas
-                //ACA PONER TWEET INDEXER Y CADA COSA
+                //ACA PONER TWEET INDEXER Y CADA COSA DENTRO DE UN TRY-CATCH
+                TweetIndexer indexer = new TweetIndexer(new TestLoader(), sqlconn);
+                indexer.run();
 
             } else {
                 if(!SqlTest) {
@@ -81,7 +82,7 @@ public class FeelmsIndexerMain {
                 System.out.print("Revisar excepciones correspondientes");
             }
 
-            */
+
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -95,11 +96,11 @@ public class FeelmsIndexerMain {
             }
         }
 
-        //  (Nota del Gonzalo)
-        //  Esto lo voy a dejar con TestLoader() porque vas a trabajar con los datos
-        //  de prueba, pero hay que cambiarlo por el MongoLoader() después, eso.
+        /*
+        //Borrar esto despues, solo para pruebas
         TweetIndexer indexer = new TweetIndexer(new TestLoader(), new TestSqlConnection());
         indexer.run();
+        */
 
     }
 

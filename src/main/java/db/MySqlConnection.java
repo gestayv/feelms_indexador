@@ -6,10 +6,7 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
@@ -51,6 +48,8 @@ public class MySqlConnection implements SqlConnection {
             ds.setUrl("jdbc:mysql://" + host + ":" + port + "/" + db_name);
 
             this.dataSource = ds;
+        } else {
+            System.out.print("\nConectado al DataSource existente\n\n");
         }
 
 
@@ -87,7 +86,7 @@ public class MySqlConnection implements SqlConnection {
     @Override
     public List<Film> getFilms() throws SQLException {
         Connection conn = null;
-        Statement stm = null;
+        PreparedStatement stm = null;
         ResultSet rs = null;
 
         List<Film> films = null;
@@ -95,14 +94,14 @@ public class MySqlConnection implements SqlConnection {
         try {
             conn = dataSource.getConnection();
 
-            stm = conn.createStatement();
-            rs = stm.executeQuery("SELECT f.id, sub.last_update, k.term\n" +
+            stm = conn.prepareStatement("SELECT f.id, sub.last_update, k.term\n" +
                     "FROM films f\n" +
                     "INNER JOIN key_terms k\n" +
                     "ON f.id = k.film_id\n" +
                     "LEFT JOIN (SELECT film_id, MAX(date) as last_update FROM tweet_counts GROUP BY film_id) sub\n" +
                     "ON sub.film_id = k.film_id\n" +
                     "ORDER BY f.id");
+            rs = stm.executeQuery();
 
             List<Film> filmsAux = new ArrayList<Film>();
             Film lastFilm = null;
@@ -133,6 +132,9 @@ public class MySqlConnection implements SqlConnection {
 
             films = filmsAux;
 
+            System.out.print("Call to GetFilms \n");
+
+            /*
             //Solo para pruebas
             for(Film film: films) {
                 System.out.print("Id film: " + film.getId() + "\n");
@@ -146,23 +148,88 @@ public class MySqlConnection implements SqlConnection {
                 }
             }
 
+            */
+
 
 
         } catch (SQLException e) {
             throw e;
         } finally {
-            if(rs != null || !rs.isClosed()) rs.close();
+            if(rs != null && !rs.isClosed()) rs.close();
 
-            if(stm != null || !stm.isClosed()) stm.close();
+            if(stm != null && !stm.isClosed()) stm.close();
 
-            if(conn != null || !conn.isClosed()) conn.close();
+            if(conn != null && !conn.isClosed()) conn.close();
         }
 
         return films;
     }
 
     @Override
-    public void writeData(List<TweetCount> data) {
+    public void writeData(List<TweetCount> data) throws SQLException {
+
+        //La query debe ser algo como
+        // INSERT INTO tweet_counts (date, count, film_id)
+        // VALUES ('YYYY-MM-DD', 100, 1), ('YYYY-MM-DD', 200, 1), (otra fila), (otra fila)
+        // Así para meter todos los valores de una
+
+        if(!data.isEmpty()) {
+            Connection conn = null;
+            PreparedStatement stm = null;
+            ResultSet rs = null;
+
+            try {
+
+                conn = dataSource.getConnection();
+
+                String queryBase = "INSERT INTO tweet_counts (date, count, film_id) VALUES";
+                StringBuilder queryValues = new StringBuilder();
+                queryValues.ensureCapacity(1200);
+
+                for(TweetCount tw: data) {
+
+                    if(queryValues.length() == 0) {
+                        queryValues.append(" (").append(tw.getDate().toString()).append(", ").append(tw.getCount()).append(", ").append(tw.getFilm_id()).append(")");
+                    } else if (queryValues.length() < 1000) {
+                        queryValues.append(", (").append(tw.getDate().toString()).append(", ").append(tw.getCount()).append(", ").append(tw.getFilm_id()).append(")");
+                    } else {
+                        //Manda a la BD los datos que tiene por ahora
+                        stm = conn.prepareStatement(queryBase + queryValues.toString());
+                        rs = stm.executeQuery();
+
+                        if(rs != null && !rs.isClosed()) rs.close();
+                        if(stm != null && !stm.isClosed()) stm.close();
+
+                        //Vacia los valores de la query
+                        queryValues = new StringBuilder();
+                    }
+                }
+
+                //Ingresa a la BD lo que falta
+                if(queryValues.length() > 0) {
+                    stm = conn.prepareStatement(queryBase + queryValues.toString());
+                    rs = stm.executeQuery();
+                }
+
+            } catch (SQLException e) {
+                throw e;
+            } finally {
+                if(rs != null && !rs.isClosed()) rs.close();
+
+                if(stm != null && !stm.isClosed()) stm.close();
+
+                if(conn != null && !conn.isClosed()) conn.close();
+            }
+
+
+
+
+        }
+
+
+
+
+
 
     }
 }

@@ -10,7 +10,7 @@ public interface SqlConnection {
 
     public List<Film> getFilms() throws SQLException;
 
-    public void writeData(List<TweetCount> data);
+    public void writeData(List<TweetCount> data) throws SQLException;
 
 
 }
