@@ -27,7 +27,23 @@ public class MongodbConnection {
     
     public MongoClient mConnection()
     {
+        /* Conexión a la base de datos con credenciales.
+        //  Usuario
+        String user = "admin";
+        //  BD donde está el usuario
+        String database = "admin";   
+        //  Pass como arreglo de caracteres, ej: 
+        //  si la contraseña es pass, se escribe como {'p', 'a', 's', 's'}
+        char[] password = {'a', 'd', 'm', 'i', 'n', '1', '2', '3'};
+
+        MongoCredential mcr = MongoCredential.createCredential(user, database, password);
+
+        MongoClient mcl = new MongoClient(new ServerAddress("localhost", 27017),
+                                                    Arrays.asList(mcr));
+        */
+        
         MongoClient mcl = new MongoClient(new ServerAddress("localhost", 27017));
+        
         try
         {
             mcl.listDatabases();
