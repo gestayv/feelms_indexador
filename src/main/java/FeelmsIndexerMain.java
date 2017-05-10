@@ -42,7 +42,6 @@ public class FeelmsIndexerMain {
             System.out.print("MySQL Host: " + mysql_host + "\n");
             System.out.print("MySQL Port: " + mysql_port + "\n");
             System.out.print("MySQL Username: " + mysql_username + "\n");
-            System.out.print("MySQL Password: " + mysql_password + "\n");
             System.out.print("MySQL DB Name: " + mysql_db_name + "\n");
 
             System.out.print("\n");
@@ -53,8 +52,8 @@ public class FeelmsIndexerMain {
             boolean SqlTest = sqlconn.test();
 
             //Conexion MongoDB
-
-            boolean MongoTest = true; //Poner acá prueba de conexion de mongo
+            MongoLoader mongoLoader = new MongoLoader();
+            boolean MongoTest = mongoLoader.connectionStatus(); //Poner acá prueba de conexion de mongo
 
             if (SqlTest && MongoTest) {
 
@@ -67,7 +66,7 @@ public class FeelmsIndexerMain {
 
                 //Realizar tareas
                 //ACA PONER TWEET INDEXER Y CADA COSA DENTRO DE UN TRY-CATCH
-                TweetIndexer indexer = new TweetIndexer(new TestLoader(), sqlconn);
+                TweetIndexer indexer = new TweetIndexer(mongoLoader, sqlconn);
                 indexer.run();
 
             } else {

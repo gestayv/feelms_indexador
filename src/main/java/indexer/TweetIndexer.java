@@ -45,6 +45,8 @@ public class TweetIndexer {
 
         List<Document> docs = tweetLoader.getTweets();
 
+        System.out.print("\n\nTWEETS LEIDOS: " + docs.size() + "\n\n");
+
         Directory dir = new RAMDirectory();
         //Analyzer analyzer = new StandardAnalyzer();
         //Mientras, incluir stopwords
@@ -132,7 +134,7 @@ public class TweetIndexer {
                     System.out.print("End: " + end.toString() + "\n\n");
 
 
-                    while(beginPoint.compareTo(end) < 0) {
+                    while(beginPoint.compareTo(end) <= 0) {
 
                         //Crea una super boolean query
                         BooleanQuery.Builder auxQB = new BooleanQuery.Builder();
