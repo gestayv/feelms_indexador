@@ -135,9 +135,11 @@ public class TweetIndexer {
                     System.out.print("End: " + end.toString() + "\n\n");
 
 
+                    //Editado para guardar fechas en su lugar, como int
                     //Para guardar usuarios y su cantidad de tweets a esta pelicula
                     ArrayList<String> usuarios = new ArrayList<String>();
-                    ArrayList<Integer> conteos = new ArrayList<Integer>();
+                    //ArrayList<Integer> conteos = new ArrayList<Integer>();
+                    ArrayList<Integer> fechas = new ArrayList<Integer>();
 
                     while(beginPoint.compareTo(end) <= 0) {
 
@@ -146,7 +148,9 @@ public class TweetIndexer {
                         auxQB.add(query, BooleanClause.Occur.MUST);
 
                         //Agrega la clausula con el dia, transforma el formato YYYY-MM-DD a yyyyMMdd que acepta el indexador
-                        BooleanClause dateClause = new BooleanClause(new TermQuery(new Term("fecha", beginPoint.format(DateTimeFormatter.BASIC_ISO_DATE))), BooleanClause.Occur.MUST);
+                        String strDate = beginPoint.format(DateTimeFormatter.BASIC_ISO_DATE);
+
+                        BooleanClause dateClause = new BooleanClause(new TermQuery(new Term("fecha", strDate)), BooleanClause.Occur.MUST);
                         auxQB.add(dateClause);
 
                         //Realizar query
@@ -156,6 +160,9 @@ public class TweetIndexer {
                         if(count > 0) {
                             tweetCounts.add(new TweetCount(film.getId(), beginPoint, count));
 
+                            //Fecha a int
+                            int intDate = Integer.parseInt(String.join("", strDate.split("-")));
+
                             ArrayList<String> ready = new ArrayList<String>();
 
                             //Para ver tweets de usuarios en particular
@@ -164,21 +171,23 @@ public class TweetIndexer {
                                 Document doc = indexSearcher.doc(scoreDoc.doc);
                                 String user = doc.get("user");
 
-
                                 if(!ready.contains(user)) {
+                                    /*
 
                                     BooleanQuery.Builder auxQB_user = new BooleanQuery.Builder();
                                     auxQB_user.add(secondQuery, BooleanClause.Occur.MUST);
                                     BooleanClause userClause = new BooleanClause(new TermQuery(new Term("user", user.toLowerCase())), BooleanClause.Occur.MUST);
                                     auxQB_user.add(userClause);
                                     int userCount = indexSearcher.count(auxQB_user.build());
-
+                                    */
                                     int index = usuarios.indexOf(user);
                                     if(index == -1) {
                                         usuarios.add(user);
-                                        conteos.add(userCount);
+                                        fechas.add(intDate);
+                                        //conteos.add(userCount);
                                     } else {
-                                        conteos.set(index, conteos.get(index) + userCount);
+                                        fechas.set(index, intDate);
+                                        //conteos.set(index, conteos.get(index) + userCount);
                                     }
 
                                     ready.add(user);
@@ -194,7 +203,8 @@ public class TweetIndexer {
                     List<User> filmUsers = new ArrayList<User>();
                     int len = usuarios.size();
                     for(int i = 0; i < len; i++) {
-                        filmUsers.add(new User(usuarios.get(i), conteos.get(i)));
+                        //filmUsers.add(new User(usuarios.get(i), conteos.get(i)));
+                        filmUsers.add(new User(usuarios.get(i), fechas.get(i)));
                     }
 
                     neo4jConnection.buildFilmUserGraph(filmUsers, film);

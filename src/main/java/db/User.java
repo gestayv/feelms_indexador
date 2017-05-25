@@ -9,9 +9,11 @@ public class User {
 
     private int count = 0;
 
-    public User(String name, int count) {
+    private int date = 0;
+
+    public User(String name, int date) {
         this.name = name;
-        this.count = count;
+        this.date = date;
     }
 
     public String getName() {
@@ -28,5 +30,13 @@ public class User {
 
     public void setCount(int count) {
         this.count = count;
+    }
+
+    public int getDate() {
+        return date;
+    }
+
+    public void setDate(int date) {
+        this.date = date;
     }
 }

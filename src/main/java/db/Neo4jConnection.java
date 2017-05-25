@@ -37,7 +37,9 @@ public class Neo4jConnection implements AutoCloseable {
         for (User user : users) {
             ArrayList aux = new ArrayList();
             aux.add(user.getName());
-            aux.add(Integer.toString(user.getCount()));
+            //Old, conteos
+            //aux.add(Integer.toString(user.getCount()));
+            aux.add(Integer.toString(user.getDate()));
             list.add(aux);
         }
 
@@ -49,6 +51,8 @@ public class Neo4jConnection implements AutoCloseable {
             params.put("userList", list);
 
             //cambiar el name por title despues
+            //OLD, con conteos
+            /*
             session.run("MERGE (m:Film {film_id: $id})\n" +
                     "ON CREATE SET m.name = $title \n" +
                     "FOREACH (n in $userList | \n" +
@@ -56,6 +60,17 @@ public class Neo4jConnection implements AutoCloseable {
                     "    MERGE (u)-[r:Tweeting]->(m)\n" +
                     "    ON CREATE SET r.count = toInteger(n[1])\n" +
                     "    ON MATCH SET r.count = r.count + toInteger(n[1])\n" +
+                    ")", params
+            ); */
+
+            //cambiar el name por title despues
+            session.run("MERGE (m:Film {film_id: $id})\n" +
+                    "ON CREATE SET m.name = $title \n" +
+                    "FOREACH (n in $userList | \n" +
+                    "\tMERGE (u:User {name: n[0]})\n" +
+                    "    MERGE (u)-[r:Tweeting]->(m)\n" +
+                    "    ON CREATE SET r.last_tweet = toInteger(n[1])\n" +
+                    "    ON MATCH SET r.last_tweet = toInteger(n[1])\n" +
                     ")", params
             );
 
