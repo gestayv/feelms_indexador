@@ -52,7 +52,7 @@ public class MongoLoader implements TweetLoader{
             
             tweet.add(new StoredField("doc_id", tw.getId_doc()));
             tweet.add(new StoredField("tweet_id", tw.getId_tweet()));
-            tweet.add(new StoredField("user", tw.getUser()));
+            tweet.add(new TextField("user", tw.getUser(), Store.YES));
             tweet.add(new StoredField("name", tw.getName()));
             tweet.add(new TextField("text", tw.getText(), Store.NO));
             tweet.add(new StoredField("rt_count", tw.getRt_count()));

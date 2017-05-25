@@ -13,15 +13,18 @@ public class Film {
 
     private LocalDate lastUpdate;
 
+    private String title;
+
     private Film() {
 
     }
 
-    public Film(int id, List<String> kw, LocalDate lastUpdate) {
+    public Film(int id, List<String> kw, LocalDate lastUpdate, String title) {
 
         this.id = id;
         this.keyterms = kw;
         this.lastUpdate = lastUpdate;
+        this.title = title;
     }
 
     public int getId() {
@@ -40,5 +43,13 @@ public class Film {
 
     public void setLastUpdate(LocalDate lastUpdate) {
         this.lastUpdate = lastUpdate;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
     }
 }
