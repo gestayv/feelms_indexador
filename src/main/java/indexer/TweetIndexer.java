@@ -210,24 +210,6 @@ public class TweetIndexer {
                     neo4jConnection.buildFilmUserGraph(filmUsers, film);
 
 
-                    /* Codigo basura, borrar cuando no lo necesite
-                    int count = indexSearcher.count(query); //Obtiene conteo de hits
-
-                    //SOLO PRUEBAS
-                    System.out.print("For id: " + film.getId() + " Count: " + count + "\n");
-
-                    TopDocs top = indexSearcher.search(query, 10);
-                    ScoreDoc[] sd = top.scoreDocs;
-
-                    for(int i = 0; i < sd.length; i++) {
-                        Document d = indexSearcher.doc(sd[i].doc);
-                        System.out.print("Id: " + d.get("doc_id") + " \n");
-                    }
-
-                    //Fin pruebas
-                    */
-
-
                 }
 
             }

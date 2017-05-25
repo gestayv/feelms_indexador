@@ -7,8 +7,6 @@ public class User {
 
     private String name;
 
-    private int count = 0;
-
     private int date = 0;
 
     public User(String name, int date) {
@@ -22,14 +20,6 @@ public class User {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public int getCount() {
-        return count;
-    }
-
-    public void setCount(int count) {
-        this.count = count;
     }
 
     public int getDate() {
