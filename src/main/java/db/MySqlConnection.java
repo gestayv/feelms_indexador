@@ -95,7 +95,7 @@ public class MySqlConnection implements SqlConnection {
         try {
             conn = dataSource.getConnection();
 
-            stm = conn.prepareStatement("SELECT f.id, sub.last_update, k.term\n" +
+            stm = conn.prepareStatement("SELECT f.id, f.title, sub.last_update, k.term\n" +
                     "FROM films f\n" +
                     "INNER JOIN key_terms k\n" +
                     "ON f.id = k.film_id\n" +
@@ -110,6 +110,7 @@ public class MySqlConnection implements SqlConnection {
             //Empieza a iterar cada elemento de la query
             while(rs.next()) {
                 int auxId = rs.getInt("f.id");
+                String auxTitle = rs.getString("f.title");
 
                 if(lastFilm == null || lastFilm.getId() != auxId) {
                     LocalDate last_update = null;
@@ -118,7 +119,7 @@ public class MySqlConnection implements SqlConnection {
                         last_update = LocalDate.parse(dateString);
                     }
 
-                    lastFilm = new Film(auxId, new ArrayList<String>(), last_update);
+                    lastFilm = new Film(auxId, new ArrayList<String>(), last_update, auxTitle);
                     filmsAux.add(lastFilm);
                 }
 
