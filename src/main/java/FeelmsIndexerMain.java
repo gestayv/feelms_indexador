@@ -1,5 +1,6 @@
 
 import db.MySqlConnection;
+import db.Neo4jConnection;
 import db.TestSqlConnection;
 import db.MongodbConnection;
 import indexer.TweetIndexer;
@@ -25,10 +26,12 @@ public class FeelmsIndexerMain {
         
         InputStream inputStream = null;
 
-        try {
-            Properties prop = new Properties();
-            String propFileName = "app.properties";
+        Properties prop = new Properties();
+        String propFileName = "app.properties";
 
+        try {
+
+            //Lectura de parametros de configuracion
             inputStream = new FileInputStream(propFileName);
 
             prop.load(inputStream);
@@ -46,60 +49,71 @@ public class FeelmsIndexerMain {
 
             System.out.print("\n");
 
+            String neo4j_uri = prop.getProperty("neo4j_uri");
+            String neo4j_user = prop.getProperty("neo4j_user");
+            String neo4j_pass = prop.getProperty("neo4j_pass");
 
-            //Conexion MySQL
-            MySqlConnection sqlconn = new MySqlConnection(mysql_username, mysql_password, mysql_host, mysql_port, mysql_db_name);
-            boolean SqlTest = sqlconn.test();
+            //Comienza a crear conexiones
 
-            //Conexion MongoDB
-            MongoLoader mongoLoader = new MongoLoader();
-            boolean MongoTest = mongoLoader.connectionStatus(); //Poner acá prueba de conexion de mongo
+            //Para cerrar automaticamente neo4j al terminar el programa
+            try (Neo4jConnection neo4jConnection = new Neo4jConnection(neo4j_uri, neo4j_user, neo4j_pass)) {
 
-            if (SqlTest && MongoTest) {
 
-                //Prueba SQL
+                //Conexion MySQL
+                MySqlConnection sqlconn = new MySqlConnection(mysql_username, mysql_password, mysql_host, mysql_port, mysql_db_name);
+                boolean SqlTest = sqlconn.test();
+
+                //Conexion MongoDB
+                MongoLoader mongoLoader = new MongoLoader();
+                boolean MongoTest = mongoLoader.connectionStatus(); //Poner acá prueba de conexion de mongo
+
+                if (SqlTest && MongoTest) {
+
+                    //Prueba SQL
+                /*
                 try {
                     sqlconn.getFilms();
                 } catch (SQLException e) {
                     e.printStackTrace();
+                } */
+
+                    //Realizar tareas
+                    //ACA PONER TWEET INDEXER Y CADA COSA DENTRO DE UN TRY-CATCH
+                    TweetIndexer indexer = new TweetIndexer(mongoLoader, sqlconn, neo4jConnection);
+                    indexer.run();
+
+                } else {
+                    if(!SqlTest) {
+                        System.out.print("Error de conexión de la base de datos MySQL\n");
+                    }
+
+                    if(!MongoTest) {
+                        System.out.print("Error de conexión de la base de datos MongoDB\n");
+                    }
+
+                    System.out.print("Revisar excepciones correspondientes");
                 }
 
-                //Realizar tareas
-                //ACA PONER TWEET INDEXER Y CADA COSA DENTRO DE UN TRY-CATCH
-                TweetIndexer indexer = new TweetIndexer(mongoLoader, sqlconn);
-                indexer.run();
 
-            } else {
-                if(!SqlTest) {
-                    System.out.print("Error de conexión de la base de datos MySQL\n");
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                if(inputStream != null) {
+                    try {
+                        inputStream.close();
+                    } catch (IOException e){
+                        e.printStackTrace();
+                    }
                 }
-
-                if(!MongoTest) {
-                    System.out.print("Error de conexión de la base de datos MongoDB\n");
-                }
-
-                System.out.print("Revisar excepciones correspondientes");
             }
-
 
 
         } catch (IOException e) {
             e.printStackTrace();
-        } finally {
-            if(inputStream != null) {
-                try {
-                    inputStream.close();
-                } catch (IOException e){
-                    e.printStackTrace();
-                }
-            }
         }
 
-        /*
-        //Borrar esto despues, solo para pruebas
-        TweetIndexer indexer = new TweetIndexer(new TestLoader(), new TestSqlConnection());
-        indexer.run();
-        */
+
 
     }
 

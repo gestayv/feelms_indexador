@@ -1,8 +1,6 @@
 package indexer;
 
-import db.Film;
-import db.SqlConnection;
-import db.TweetCount;
+import db.*;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.CharArraySet;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
@@ -23,6 +21,7 @@ import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Arturo on 07-05-2017.
@@ -31,14 +30,16 @@ public class TweetIndexer {
 
     private TweetLoader tweetLoader;
     private SqlConnection sqlConn;
+    private Neo4jConnection neo4jConnection;
 
     private TweetIndexer() {
 
     }
 
-    public TweetIndexer(TweetLoader tw, SqlConnection s) {
+    public TweetIndexer(TweetLoader tw, SqlConnection s, Neo4jConnection neo4jConnection) {
         this.tweetLoader = tw;
         this.sqlConn = s;
+        this.neo4jConnection = neo4jConnection;
     }
 
     public void run() {
@@ -134,6 +135,12 @@ public class TweetIndexer {
                     System.out.print("End: " + end.toString() + "\n\n");
 
 
+                    //Editado para guardar fechas en su lugar, como int
+                    //Para guardar usuarios y su cantidad de tweets a esta pelicula
+                    ArrayList<String> usuarios = new ArrayList<String>();
+                    //ArrayList<Integer> conteos = new ArrayList<Integer>();
+                    ArrayList<Integer> fechas = new ArrayList<Integer>();
+
                     while(beginPoint.compareTo(end) <= 0) {
 
                         //Crea una super boolean query
@@ -141,14 +148,51 @@ public class TweetIndexer {
                         auxQB.add(query, BooleanClause.Occur.MUST);
 
                         //Agrega la clausula con el dia, transforma el formato YYYY-MM-DD a yyyyMMdd que acepta el indexador
-                        BooleanClause dateClause = new BooleanClause(new TermQuery(new Term("fecha", beginPoint.format(DateTimeFormatter.BASIC_ISO_DATE))), BooleanClause.Occur.MUST);
+                        String strDate = beginPoint.format(DateTimeFormatter.BASIC_ISO_DATE);
+
+                        BooleanClause dateClause = new BooleanClause(new TermQuery(new Term("fecha", strDate)), BooleanClause.Occur.MUST);
                         auxQB.add(dateClause);
 
                         //Realizar query
-                        int count = indexSearcher.count(auxQB.build());
+                        BooleanQuery secondQuery = auxQB.build();
+                        int count = indexSearcher.count(secondQuery);
 
                         if(count > 0) {
                             tweetCounts.add(new TweetCount(film.getId(), beginPoint, count));
+
+                            //Fecha a int
+                            int intDate = Integer.parseInt(String.join("", strDate.split("-")));
+
+                            ArrayList<String> ready = new ArrayList<String>();
+
+                            //Para ver tweets de usuarios en particular
+                            TopDocs topDocs = indexSearcher.search(secondQuery, count);
+                            for (ScoreDoc scoreDoc: topDocs.scoreDocs) {
+                                Document doc = indexSearcher.doc(scoreDoc.doc);
+                                String user = doc.get("user");
+
+                                if(!ready.contains(user)) {
+                                    /*
+
+                                    BooleanQuery.Builder auxQB_user = new BooleanQuery.Builder();
+                                    auxQB_user.add(secondQuery, BooleanClause.Occur.MUST);
+                                    BooleanClause userClause = new BooleanClause(new TermQuery(new Term("user", user.toLowerCase())), BooleanClause.Occur.MUST);
+                                    auxQB_user.add(userClause);
+                                    int userCount = indexSearcher.count(auxQB_user.build());
+                                    */
+                                    int index = usuarios.indexOf(user);
+                                    if(index == -1) {
+                                        usuarios.add(user);
+                                        fechas.add(intDate);
+                                        //conteos.add(userCount);
+                                    } else {
+                                        fechas.set(index, intDate);
+                                        //conteos.set(index, conteos.get(index) + userCount);
+                                    }
+
+                                    ready.add(user);
+                                }
+                            }
                         }
 
                         //Avanzar un dia
@@ -156,24 +200,14 @@ public class TweetIndexer {
 
                     }
 
-
-
-                    /* Codigo basura, borrar cuando no lo necesite
-                    int count = indexSearcher.count(query); //Obtiene conteo de hits
-
-                    //SOLO PRUEBAS
-                    System.out.print("For id: " + film.getId() + " Count: " + count + "\n");
-
-                    TopDocs top = indexSearcher.search(query, 10);
-                    ScoreDoc[] sd = top.scoreDocs;
-
-                    for(int i = 0; i < sd.length; i++) {
-                        Document d = indexSearcher.doc(sd[i].doc);
-                        System.out.print("Id: " + d.get("doc_id") + " \n");
+                    List<User> filmUsers = new ArrayList<User>();
+                    int len = usuarios.size();
+                    for(int i = 0; i < len; i++) {
+                        //filmUsers.add(new User(usuarios.get(i), conteos.get(i)));
+                        filmUsers.add(new User(usuarios.get(i), fechas.get(i)));
                     }
 
-                    //Fin pruebas
-                    */
+                    neo4jConnection.buildFilmUserGraph(filmUsers, film);
 
 
                 }

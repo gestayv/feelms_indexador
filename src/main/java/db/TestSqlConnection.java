@@ -18,7 +18,7 @@ public class TestSqlConnection implements SqlConnection {
         keywords.add("star wars");
         keywords.add("los ultimos jedi");
         keywords.add("the last jedi");
-        films.add(new Film(1, keywords, LocalDate.parse("2017-05-01")));
+        films.add(new Film(1, keywords, LocalDate.parse("2017-05-01"), "Star Wars"));
 
         return films;
     }
