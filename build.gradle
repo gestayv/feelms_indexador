@@ -27,6 +27,7 @@ task buildProject(dependsOn: ['fatJar', 'copyProperties'])
 
 
 repositories {
+    jcenter()
     mavenCentral()
 }
 
