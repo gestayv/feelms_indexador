@@ -6,6 +6,7 @@ import db.MongodbConnection;
 import indexer.TweetIndexer;
 import tweets.TestLoader;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,7 +33,15 @@ public class FeelmsIndexerMain {
         try {
 
             //Lectura de parametros de configuracion
-            inputStream = new FileInputStream(propFileName);
+
+            File f = new File(FeelmsIndexerMain.class.getProtectionDomain().getCodeSource().getLocation().getFile());
+            String path = f.getParent() + File.separator + propFileName;
+
+            System.out.print("\n" + path + "\n");
+
+            //inputStream = FeelmsIndexerMain.class.getResourceAsStream("/" + propFileName);
+            //inputStream = new FileInputStream(propFileName);
+            inputStream = new FileInputStream(path);
 
             prop.load(inputStream);
 
@@ -55,6 +64,7 @@ public class FeelmsIndexerMain {
 
             //Comienza a crear conexiones
 
+
             //Para cerrar automaticamente neo4j al terminar el programa
             try (Neo4jConnection neo4jConnection = new Neo4jConnection(neo4j_uri, neo4j_user, neo4j_pass)) {
 
@@ -69,13 +79,6 @@ public class FeelmsIndexerMain {
 
                 if (SqlTest && MongoTest) {
 
-                    //Prueba SQL
-                /*
-                try {
-                    sqlconn.getFilms();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                } */
 
                     //Realizar tareas
                     //ACA PONER TWEET INDEXER Y CADA COSA DENTRO DE UN TRY-CATCH
@@ -93,7 +96,6 @@ public class FeelmsIndexerMain {
 
                     System.out.print("Revisar excepciones correspondientes");
                 }
-
 
 
             } catch (Exception e) {
