@@ -35,7 +35,8 @@ public class FeelmsIndexerMain {
             //Lectura de parametros de configuracion
 
             File f = new File(FeelmsIndexerMain.class.getProtectionDomain().getCodeSource().getLocation().getFile());
-            String path = f.getParent() + File.separator + propFileName;
+            String basePath = f.getParent() + File.separator;
+            String path = basePath + propFileName;
 
             System.out.print("\n" + path + "\n");
 
