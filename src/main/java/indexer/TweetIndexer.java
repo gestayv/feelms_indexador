@@ -200,6 +200,7 @@ public class TweetIndexer {
 
                     }
 
+
                     List<User> filmUsers = new ArrayList<User>();
                     int len = usuarios.size();
                     for(int i = 0; i < len; i++) {
