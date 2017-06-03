@@ -12,5 +12,6 @@ public interface SqlConnection {
 
     public int writeData(List<TweetCount> data) throws SQLException;
 
+    public int writeSentiment(List<TweetsSentiments> data) throws SQLException;
 
 }

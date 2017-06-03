@@ -3,6 +3,7 @@ import db.MySqlConnection;
 import db.Neo4jConnection;
 import db.TestSqlConnection;
 import db.MongodbConnection;
+import indexer.SentimentAnalyzer;
 import indexer.TweetIndexer;
 import tweets.TestLoader;
 
@@ -63,12 +64,16 @@ public class FeelmsIndexerMain {
             String neo4j_user = prop.getProperty("neo4j_user");
             String neo4j_pass = prop.getProperty("neo4j_pass");
 
+            String LIWCFileName = prop.getProperty("LIWCFile");
+
             //Comienza a crear conexiones
 
 
             //Para cerrar automaticamente neo4j al terminar el programa
             try (Neo4jConnection neo4jConnection = new Neo4jConnection(neo4j_uri, neo4j_user, neo4j_pass)) {
 
+                //Analizador de sentimientos
+                SentimentAnalyzer sentimentAnalyzer = new SentimentAnalyzer(basePath + LIWCFileName);
 
                 //Conexion MySQL
                 MySqlConnection sqlconn = new MySqlConnection(mysql_username, mysql_password, mysql_host, mysql_port, mysql_db_name);
@@ -83,7 +88,7 @@ public class FeelmsIndexerMain {
 
                     //Realizar tareas
                     //ACA PONER TWEET INDEXER Y CADA COSA DENTRO DE UN TRY-CATCH
-                    TweetIndexer indexer = new TweetIndexer(mongoLoader, sqlconn, neo4jConnection);
+                    TweetIndexer indexer = new TweetIndexer(mongoLoader, sqlconn, neo4jConnection, sentimentAnalyzer);
                     indexer.run();
 
                 } else {

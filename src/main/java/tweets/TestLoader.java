@@ -1,5 +1,6 @@
 package tweets;
 
+import db.DocumentList;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.StoredField;
 import org.apache.lucene.document.TextField;
@@ -18,7 +19,7 @@ public class TestLoader implements TweetLoader {
 
 
     @Override
-    public List<Document> getTweets() {
+    public DocumentList getTweets() {
 
         List<Document> docs = new ArrayList<Document>();
 
@@ -108,7 +109,7 @@ public class TestLoader implements TweetLoader {
 
         docs.add(docA);
 
-        return docs;
+        return new DocumentList(null, docs);
     }
 
     @Override

@@ -1,5 +1,6 @@
 package tweets;
 
+import db.DocumentList;
 import org.apache.lucene.document.Document;
 
 import java.util.Date;
@@ -10,7 +11,7 @@ import java.util.List;
  */
 public interface TweetLoader {
 
-    public List<Document> getTweets();
+    public DocumentList getTweets();
 
     public List<Document> getTweets(Date date);
 
