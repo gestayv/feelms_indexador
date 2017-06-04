@@ -85,6 +85,7 @@ public class SentimentAnalyzer {
         }
     }
 
+    //Metodo que recibe el texto del tweet y lo analiza
     public int analyzeTweet(String tweet) {
 
         String[] wordsAux = tweet.split(" ");
