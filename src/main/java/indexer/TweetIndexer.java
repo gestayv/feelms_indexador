@@ -20,6 +20,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalUnit;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -31,20 +32,33 @@ public class TweetIndexer {
     private TweetLoader tweetLoader;
     private SqlConnection sqlConn;
     private Neo4jConnection neo4jConnection;
+    private SentimentAnalyzer sentimentAnalyzer;
 
     private TweetIndexer() {
 
     }
 
-    public TweetIndexer(TweetLoader tw, SqlConnection s, Neo4jConnection neo4jConnection) {
+    public TweetIndexer(TweetLoader tw, SqlConnection s, Neo4jConnection neo4jConnection, SentimentAnalyzer sentimentAnalyzer) {
         this.tweetLoader = tw;
         this.sqlConn = s;
         this.neo4jConnection = neo4jConnection;
+        this.sentimentAnalyzer = sentimentAnalyzer;
+
     }
 
     public void run() {
 
-        List<Document> docs = tweetLoader.getTweets();
+        //List<Document> docs = tweetLoader.getTweets();
+        DocumentList docList = tweetLoader.getTweets();
+        List<Document> docs = docList.getDocuments();
+
+
+        List<Tweet> tweetList = docList.getTweets();
+        Double tweetMapCap = (tweetList.size() / 0.75) + 1;
+        Map<String, String> tweetMap = new HashMap<String, String>(tweetMapCap.intValue());
+        for (Tweet t : tweetList) {
+            tweetMap.put(t.getId_doc(), t.getText());
+        }
 
         System.out.print("\n\nTWEETS LEIDOS: " + docs.size() + "\n\n");
 
@@ -57,6 +71,8 @@ public class TweetIndexer {
         //Para cerrarlo en caso de exception
         IndexWriter indexWriter = null;
         IndexReader indexReader = null;
+
+
 
         try {
 
@@ -74,6 +90,8 @@ public class TweetIndexer {
             //QueryBuilder queryBuilder = new QueryBuilder(analyzer);
 
             List<TweetCount> tweetCounts = new ArrayList<TweetCount>();
+
+            List<TweetsSentiments> tweetsSentiments = new ArrayList<TweetsSentiments>();
 
             //Por cada film, empieza a buscar tweets
             for (Film film: films) {
@@ -123,7 +141,7 @@ public class TweetIndexer {
                     //Empieza a calcular los tweets por dia
                     LocalDate beginPoint = null;
                     if(film.getLastUpdate() == null) {
-                        beginPoint = LocalDate.now().minusDays(10);
+                        beginPoint = LocalDate.now().minusDays(30);
                     } else {
                         beginPoint = film.getLastUpdate().plusDays(1);
                     }
@@ -165,10 +183,28 @@ public class TweetIndexer {
 
                             ArrayList<String> ready = new ArrayList<String>();
 
-                            //Para ver tweets de usuarios en particular
+                            double tweetPos = 0.0;
+                            double tweetNeg = 0.0;
+                            //int tweetNeut = 0;
+
+                            //Para ver tweets de usuarios en particular y analisis de sentimientos de tweets
                             TopDocs topDocs = indexSearcher.search(secondQuery, count);
                             for (ScoreDoc scoreDoc: topDocs.scoreDocs) {
                                 Document doc = indexSearcher.doc(scoreDoc.doc);
+
+                                //Parte para analisis de sentimientos de los Tweets
+                                //int doc_id = Integer.valueOf(doc.get("doc_id"));
+                                String doc_id = doc.get("doc_id");
+                                String tweetText = tweetMap.get(doc_id);
+
+                                int sentimentValue = sentimentAnalyzer.analyzeTweet(tweetText);
+                                if(sentimentValue > 0) {
+                                    tweetPos++;
+                                } else if (sentimentValue < 0) {
+                                    tweetNeg++;
+                                }
+
+                                //Parte conteo de tweets por usuario para grafos
                                 String user = doc.get("user");
 
                                 if(!ready.contains(user)) {
@@ -193,12 +229,19 @@ public class TweetIndexer {
                                     ready.add(user);
                                 }
                             }
+
+
+                            //Agrega los porcentajes de tweets segun analisis de sentimientos
+                            tweetsSentiments.add(new TweetsSentiments(film.getId(), beginPoint, tweetPos / count, tweetNeg / count));
+
+
                         }
 
                         //Avanzar un dia
                         beginPoint = beginPoint.plusDays(1);
 
                     }
+
 
                     List<User> filmUsers = new ArrayList<User>();
                     int len = usuarios.size();
@@ -222,6 +265,15 @@ public class TweetIndexer {
             } else {
                 System.out.print("\nSin conteos que escribir\n");
             }
+
+            if(!tweetsSentiments.isEmpty()) {
+                System.out.print("\nEscribiendo porcentajes de pos/neg\n");
+                int filasSent = sqlConn.writeSentiment(tweetsSentiments);
+                System.out.print("Filas Agregadas: " + filasSent + "\n");
+            } else {
+                System.out.print("\nSin porcentajes que escribir\n");
+            }
+
 
         } catch (IOException | SQLException e) {
             System.out.print(e);

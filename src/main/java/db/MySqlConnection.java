@@ -232,8 +232,69 @@ public class MySqlConnection implements SqlConnection {
 
         return 0;
 
-
-
-
     }
+
+    @Override
+    public int writeSentiment(List<TweetsSentiments> data) throws SQLException {
+        if(!data.isEmpty()) {
+            Connection conn = null;
+            PreparedStatement stm = null;
+            ResultSet rs = null;
+
+            try {
+
+                conn = dataSource.getConnection();
+
+                String queryBase = "INSERT INTO tweet_sentiments (date, pos, neg, film_id) VALUES";
+                StringBuilder queryValues = new StringBuilder();
+                queryValues.ensureCapacity(1500);
+
+                int updatedRows = 0;
+
+                for(TweetsSentiments tw: data) {
+
+                    if(queryValues.length() == 0) {
+                        queryValues.append(" (\'").append(tw.getDate().toString()).append("\', ").append(Double.toString(tw.getPos())).append(", ").append(Double.toString(tw.getNeg())).append(", ").append(tw.getFilm_id()).append(")");
+
+                    } else if (queryValues.length() < 1000) {
+                        queryValues.append(", (\'").append(tw.getDate().toString()).append("\', ").append(Double.toString(tw.getPos())).append(", ").append(Double.toString(tw.getNeg())).append(", ").append(tw.getFilm_id()).append(")");
+
+                    } else {
+                        //Manda a la BD los datos que tiene por ahora
+                        stm = conn.prepareStatement(queryBase + queryValues.toString());
+                        updatedRows += stm.executeUpdate();
+
+                        if(rs != null && !rs.isClosed()) rs.close();
+                        if(stm != null && !stm.isClosed()) stm.close();
+
+                        //Vacia los valores de la query
+                        queryValues = new StringBuilder();
+                    }
+                }
+
+                //Ingresa a la BD lo que falta
+                if(queryValues.length() > 0) {
+                    stm = conn.prepareStatement(queryBase + queryValues.toString());
+                    updatedRows += stm.executeUpdate();
+                }
+
+                return updatedRows;
+
+            } catch (SQLException e) {
+                throw e;
+            } finally {
+                if(rs != null && !rs.isClosed()) rs.close();
+
+                if(stm != null && !stm.isClosed()) stm.close();
+
+                if(conn != null && !conn.isClosed()) conn.close();
+            }
+
+        }
+
+
+        return 0;
+    }
+
+
 }
