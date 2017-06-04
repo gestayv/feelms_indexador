@@ -55,9 +55,9 @@ public class TweetIndexer {
 
         List<Tweet> tweetList = docList.getTweets();
         Double tweetMapCap = (tweetList.size() / 0.75) + 1;
-        Map<Integer, String> tweetMap = new HashMap<Integer, String>(tweetMapCap.intValue());
+        Map<String, String> tweetMap = new HashMap<String, String>(tweetMapCap.intValue());
         for (Tweet t : tweetList) {
-            tweetMap.put(Integer.valueOf(t.getId_doc()), t.getText());
+            tweetMap.put(t.getId_doc(), t.getText());
         }
 
         System.out.print("\n\nTWEETS LEIDOS: " + docs.size() + "\n\n");
@@ -193,7 +193,8 @@ public class TweetIndexer {
                                 Document doc = indexSearcher.doc(scoreDoc.doc);
 
                                 //Parte para analisis de sentimientos de los Tweets
-                                int doc_id = Integer.valueOf(doc.get("doc_id"));
+                                //int doc_id = Integer.valueOf(doc.get("doc_id"));
+                                String doc_id = doc.get("doc_id");
                                 String tweetText = tweetMap.get(doc_id);
 
                                 int sentimentValue = sentimentAnalyzer.analyzeTweet(tweetText);
@@ -263,6 +264,15 @@ public class TweetIndexer {
             } else {
                 System.out.print("\nSin conteos que escribir\n");
             }
+
+            if(!tweetsSentiments.isEmpty()) {
+                System.out.print("\nEscribiendo porcentajes de pos/neg\n");
+                int filasSent = sqlConn.writeSentiment(tweetsSentiments);
+                System.out.print("Filas Agregadas: " + filasSent + "\n");
+            } else {
+                System.out.print("\nSin porcentajes que escribir\n");
+            }
+
 
         } catch (IOException | SQLException e) {
             System.out.print(e);

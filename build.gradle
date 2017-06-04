@@ -23,7 +23,12 @@ task copyProperties(type: Copy) {
     into(buildDir.toString() + '/libs')
 }
 
-task buildProject(dependsOn: ['fatJar', 'copyProperties'])
+task copyLexicon(type: Copy) {
+    from(file('src/main/resources/LIWCLexicon.csv'))
+    into(buildDir.toString() + '/libs')
+}
+
+task buildProject(dependsOn: ['fatJar', 'copyProperties', 'copyLexicon'])
 
 
 repositories {

@@ -132,19 +132,22 @@ public class SentimentAnalyzer {
             }
         }
 
-        if(pos > 0 && neg == 0) {
-            return 1;
-        } else if (neg > 0 && pos == 0) {
-            return - 1;
+
+        if(pos > 0 || neg > 0) {
+            if(pos > 0 && neg == 0) {
+                return 1;
+            } else if (neg > 0 && pos == 0) {
+                return - 1;
+            }
+            float ratio = (pos - neg)/(pos + neg);
+
+            if(ratio >= 0.15) {
+                return 1;
+            } else if (ratio <= 0.15) {
+                return -1;
+            }
         }
 
-        float ratio = (pos - neg)/(pos + neg);
-
-        if(ratio >= 0.15) {
-            return 1;
-        } else if (ratio <= 0.15) {
-            return -1;
-        }
         return 0;
     }
 
