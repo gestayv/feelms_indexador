@@ -59,7 +59,7 @@ public class SentimentAnalyzer {
 
             for (String auxLine: lines) {
                 String[] lineSplit = auxLine.split(",");
-                String word = StringUtils.stripAccents(lineSplit[0].toLowerCase());
+                String word = StringUtils.stripAccents(lineSplit[0].trim().toLowerCase());
                 int pos = Integer.valueOf(lineSplit[1]);
                 int neg = Integer.valueOf(lineSplit[2]);
                 int value = pos - neg;
@@ -68,7 +68,7 @@ public class SentimentAnalyzer {
 
             for (String auxLine: suffixLines) {
                 String[] lineSplit = auxLine.split(",");
-                String word = StringUtils.stripAccents(lineSplit[0].replace("*", "").toLowerCase());
+                String word = StringUtils.stripAccents(lineSplit[0].replace("*", "").trim().toLowerCase());
                 int pos = Integer.valueOf(lineSplit[1]);
                 int neg = Integer.valueOf(lineSplit[2]);
                 int value = pos - neg;
@@ -78,6 +78,7 @@ public class SentimentAnalyzer {
             stopwords = SpanishAnalyzer.getDefaultStopSet();
 
 
+
         } catch (FileNotFoundException e) {
             System.out.print(e.getMessage());
             throw e;
@@ -85,15 +86,16 @@ public class SentimentAnalyzer {
     }
 
     public int analyzeTweet(String tweet) {
+
         String[] wordsAux = tweet.split(" ");
 
         List<String> words = new ArrayList<String>();
 
         int n = 0; //Cantidad de palabras a contar
 
-        int pos = 0;
-        int neg = 0;
-        int neutral = 0;
+        double pos = 0.0;
+        double neg = 0.0;
+        double neutral = 0.0;
 
         for (String word: wordsAux) {
             String auxWord = StringUtils.stripAccents(word.toLowerCase());
@@ -132,14 +134,13 @@ public class SentimentAnalyzer {
             }
         }
 
-
         if(pos > 0 || neg > 0) {
             if(pos > 0 && neg == 0) {
                 return 1;
             } else if (neg > 0 && pos == 0) {
                 return - 1;
             }
-            float ratio = (pos - neg)/(pos + neg);
+            double ratio = (pos - neg)/(pos + neg);
 
             if(ratio >= 0.15) {
                 return 1;

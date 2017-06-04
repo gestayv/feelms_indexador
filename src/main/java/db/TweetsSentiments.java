@@ -9,10 +9,10 @@ public class TweetsSentiments {
 
     private int film_id;
     private LocalDate date;
-    private float pos;
-    private float neg;
+    private double pos;
+    private double neg;
 
-    public TweetsSentiments(int film_id, LocalDate date, float pos, float neg) {
+    public TweetsSentiments(int film_id, LocalDate date, double pos, double neg) {
         this.film_id = film_id;
         this.date = date;
         this.pos = pos;
@@ -35,19 +35,19 @@ public class TweetsSentiments {
         this.date = date;
     }
 
-    public float getPos() {
+    public double getPos() {
         return pos;
     }
 
-    public void setPos(float pos) {
+    public void setPos(double pos) {
         this.pos = pos;
     }
 
-    public float getNeg() {
+    public double getNeg() {
         return neg;
     }
 
-    public void setNeg(float neg) {
+    public void setNeg(double neg) {
         this.neg = neg;
     }
 }

@@ -254,10 +254,10 @@ public class MySqlConnection implements SqlConnection {
                 for(TweetsSentiments tw: data) {
 
                     if(queryValues.length() == 0) {
-                        queryValues.append(" (\'").append(tw.getDate().toString()).append("\', ").append(tw.getPos()).append(", ").append(tw.getNeg()).append(", ").append(tw.getFilm_id()).append(")");
+                        queryValues.append(" (\'").append(tw.getDate().toString()).append("\', ").append(Double.toString(tw.getPos())).append(", ").append(Double.toString(tw.getNeg())).append(", ").append(tw.getFilm_id()).append(")");
 
                     } else if (queryValues.length() < 1000) {
-                        queryValues.append(", (\'").append(tw.getDate().toString()).append("\', ").append(tw.getPos()).append(", ").append(tw.getNeg()).append(", ").append(tw.getFilm_id()).append(")");
+                        queryValues.append(", (\'").append(tw.getDate().toString()).append("\', ").append(Double.toString(tw.getPos())).append(", ").append(Double.toString(tw.getNeg())).append(", ").append(tw.getFilm_id()).append(")");
 
                     } else {
                         //Manda a la BD los datos que tiene por ahora

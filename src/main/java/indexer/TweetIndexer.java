@@ -141,7 +141,7 @@ public class TweetIndexer {
                     //Empieza a calcular los tweets por dia
                     LocalDate beginPoint = null;
                     if(film.getLastUpdate() == null) {
-                        beginPoint = LocalDate.now().minusDays(10);
+                        beginPoint = LocalDate.now().minusDays(30);
                     } else {
                         beginPoint = film.getLastUpdate().plusDays(1);
                     }
@@ -183,8 +183,8 @@ public class TweetIndexer {
 
                             ArrayList<String> ready = new ArrayList<String>();
 
-                            int tweetPos = 0;
-                            int tweetNeg = 0;
+                            double tweetPos = 0.0;
+                            double tweetNeg = 0.0;
                             //int tweetNeut = 0;
 
                             //Para ver tweets de usuarios en particular y analisis de sentimientos de tweets
@@ -229,6 +229,7 @@ public class TweetIndexer {
                                     ready.add(user);
                                 }
                             }
+
 
                             //Agrega los porcentajes de tweets segun analisis de sentimientos
                             tweetsSentiments.add(new TweetsSentiments(film.getId(), beginPoint, tweetPos / count, tweetNeg / count));
