@@ -91,7 +91,7 @@ public class TweetIndexer {
 
             List<TweetCount> tweetCounts = new ArrayList<TweetCount>();
 
-            List<TweetsSentiments> tweetsSentiments = new ArrayList<TweetsSentiments>();
+            //List<TweetsSentiments> tweetsSentiments = new ArrayList<TweetsSentiments>();
 
             //Por cada film, empieza a buscar tweets
             for (Film film: films) {
@@ -176,15 +176,15 @@ public class TweetIndexer {
                         int count = indexSearcher.count(secondQuery);
 
                         if(count > 0) {
-                            tweetCounts.add(new TweetCount(film.getId(), beginPoint, count));
+                            //tweetCounts.add(new TweetCount(film.getId(), beginPoint, count));
 
                             //Fecha a int
                             int intDate = Integer.parseInt(String.join("", strDate.split("-")));
 
                             ArrayList<String> ready = new ArrayList<String>();
 
-                            double tweetPos = 0.0;
-                            double tweetNeg = 0.0;
+                            int tweetPos = 0;
+                            int tweetNeg = 0;
                             //int tweetNeut = 0;
 
                             //Para ver tweets de usuarios en particular y analisis de sentimientos de tweets
@@ -231,8 +231,11 @@ public class TweetIndexer {
                             }
 
 
-                            //Agrega los porcentajes de tweets segun analisis de sentimientos
-                            tweetsSentiments.add(new TweetsSentiments(film.getId(), beginPoint, tweetPos / count, tweetNeg / count));
+                            //Agrega los porcentajes de tweets segun analisis de sentimientos y conteos
+
+                            tweetCounts.add(new TweetCount(film.getId(), beginPoint, count, tweetPos, tweetNeg));
+
+                            //tweetsSentiments.add(new TweetsSentiments(film.getId(), beginPoint, tweetPos / count, tweetNeg / count));
 
 
                         }
@@ -266,6 +269,7 @@ public class TweetIndexer {
                 System.out.print("\nSin conteos que escribir\n");
             }
 
+            /*
             if(!tweetsSentiments.isEmpty()) {
                 System.out.print("\nEscribiendo porcentajes de pos/neg\n");
                 int filasSent = sqlConn.writeSentiment(tweetsSentiments);
@@ -273,7 +277,7 @@ public class TweetIndexer {
             } else {
                 System.out.print("\nSin porcentajes que escribir\n");
             }
-
+            */
 
         } catch (IOException | SQLException e) {
             System.out.print(e);

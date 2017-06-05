@@ -182,7 +182,7 @@ public class MySqlConnection implements SqlConnection {
 
                 conn = dataSource.getConnection();
 
-                String queryBase = "INSERT INTO tweet_counts (date, count, film_id) VALUES";
+                String queryBase = "INSERT INTO tweet_counts (date, count, pos, neg, film_id) VALUES";
                 StringBuilder queryValues = new StringBuilder();
                 queryValues.ensureCapacity(1200);
 
@@ -191,9 +191,9 @@ public class MySqlConnection implements SqlConnection {
                 for(TweetCount tw: data) {
 
                     if(queryValues.length() == 0) {
-                        queryValues.append(" (\'").append(tw.getDate().toString()).append("\', ").append(tw.getCount()).append(", ").append(tw.getFilm_id()).append(")");
-                    } else if (queryValues.length() < 1000) {
-                        queryValues.append(", (\'").append(tw.getDate().toString()).append("\', ").append(tw.getCount()).append(", ").append(tw.getFilm_id()).append(")");
+                        queryValues.append(" (\'").append(tw.getDate().toString()).append("\', ").append(tw.getCount()).append(", ").append(tw.getPos()).append(", ").append(tw.getNeg()).append(", ").append(tw.getFilm_id()).append(")");
+                    } else if (queryValues.length() < 2000) {
+                        queryValues.append(", (\'").append(tw.getDate().toString()).append("\', ").append(tw.getCount()).append(", ").append(tw.getPos()).append(", ").append(tw.getNeg()).append(", ").append(tw.getFilm_id()).append(")");
                     } else {
                         //Manda a la BD los datos que tiene por ahora
                         stm = conn.prepareStatement(queryBase + queryValues.toString());
@@ -225,14 +225,12 @@ public class MySqlConnection implements SqlConnection {
                 if(conn != null && !conn.isClosed()) conn.close();
             }
 
-
-
-
         }
 
         return 0;
 
     }
+
 
     @Override
     public int writeSentiment(List<TweetsSentiments> data) throws SQLException {
