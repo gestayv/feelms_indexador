@@ -1,5 +1,6 @@
 package db;
 
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,5 +29,11 @@ public class TestSqlConnection implements SqlConnection {
 
         return 0;
     }
+
+    @Override
+    public int writeSentiment(List<TweetsSentiments> data) throws SQLException {
+        return 0;
+    }
+
 
 }

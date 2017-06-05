@@ -5,6 +5,7 @@
  */
 package tweets;
 
+import db.DocumentList;
 import db.MongodbConnection;
 import db.Tweet;
 
@@ -36,7 +37,7 @@ public class MongoLoader implements TweetLoader{
     //  Obtiene todos los tweets como un listado de tweets creados previamente
     //  los que se añaden a un listado de documentos que serán indexados.
     @Override   
-    public List<Document> getTweets() {
+    public DocumentList getTweets() {
             
         //  Se obtiene el listado de tweets.
         MongodbConnection mdc = new MongodbConnection();
@@ -63,7 +64,8 @@ public class MongoLoader implements TweetLoader{
             docs.add(tweet);
         }
         
-        return docs;
+        //return docs;
+        return new DocumentList(lt, docs);
     }
     
     @Override

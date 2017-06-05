@@ -44,7 +44,7 @@ public class MySqlConnection implements SqlConnection {
             ds.setPassword(pass);
             //ds.setDatabaseName(db_name);
             //ds.setPort(Integer.parseInt(port));
-            ds.setUrl("jdbc:mysql://" + host + ":" + port + "/" + db_name+"?serverTimezone=UTC");
+            ds.setUrl("jdbc:mysql://" + host + ":" + port + "/" + db_name);
 
             this.dataSource = ds;
         } else {
@@ -225,8 +225,15 @@ public class MySqlConnection implements SqlConnection {
                 if(conn != null && !conn.isClosed()) conn.close();
             }
 
+
+
+
         }
 
         return 0;
+
+
+
+
     }
 }
