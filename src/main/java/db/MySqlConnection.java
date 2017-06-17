@@ -233,7 +233,10 @@ public class MySqlConnection implements SqlConnection {
         return 0;
 
 
+    }
 
-
+    @Override
+    public int writeSentiment(List<TweetsSentiments> data) throws SQLException {
+        return 0;
     }
 }
