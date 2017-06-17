@@ -35,5 +35,10 @@ public class TestSqlConnection implements SqlConnection {
         return 0;
     }
 
+    @Override
+    public ArrayList<String> getCountryCodes() throws SQLException {
+        return null;
+    }
+
 
 }

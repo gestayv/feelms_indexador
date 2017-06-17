@@ -1,6 +1,7 @@
 package db;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -13,5 +14,7 @@ public interface SqlConnection {
     public int writeData(List<TweetCount> data) throws SQLException;
 
     public int writeSentiment(List<TweetsSentiments> data) throws SQLException;
+
+    public ArrayList<String> getCountryCodes() throws SQLException;
 
 }
