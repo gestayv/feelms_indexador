@@ -13,6 +13,7 @@ import java.util.List;
  */
 public class Tweet {
 
+
     private String id_doc;
     private String id_tweet;
     private String user;
@@ -21,8 +22,9 @@ public class Tweet {
     private String rt_count;
     private String fecha;
     private String hashtag;
+    private String pais;
     
-    public Tweet(String id_doc, String id_tweet, String usr, String name, String text, String rt_count, String fecha, String ht)
+    public Tweet(String id_doc, String id_tweet, String usr, String name, String text, String rt_count, String fecha, String ht, String pais)
     {
         this.id_doc = id_doc;
         this.id_tweet = id_tweet;
@@ -32,8 +34,23 @@ public class Tweet {
         this.rt_count = rt_count;
         this.fecha = fecha;
         this.hashtag = ht;
+        this.pais = pais;
     }
     
+    /**
+     * @return the pais
+     */
+    public String getPais() {
+        return pais;
+    }
+
+    /**
+     * @param pais the pais to set
+     */
+    public void setPais(String pais) {
+        this.pais = pais;
+    }
+
     /**
      * @return the id_doc
      */

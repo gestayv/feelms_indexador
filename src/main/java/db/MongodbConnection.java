@@ -82,7 +82,8 @@ public class MongodbConnection {
            String rt_count = documento.get("rt_count").toString();
            String fecha = documento.get("fecha").toString();
            String ht = documento.get("hashtag").toString();
-           Tweet tw = new Tweet(id_doc, id_tweet, user, name, texto, rt_count, fecha, ht);
+           String pais = documento.get("pais").toString();
+           Tweet tw = new Tweet(id_doc, id_tweet, user, name, texto, rt_count, fecha, ht, pais);
            
            tweets.add(tw);
         }
