@@ -1,5 +1,6 @@
 package db;
 
+import com.mysql.cj.api.mysqla.result.Resultset;
 import com.mysql.cj.jdbc.MysqlDataSource;
 
 import javax.naming.Context;
@@ -168,6 +169,92 @@ public class MySqlConnection implements SqlConnection {
     @Override
     public int writeData(List<TweetCount> data) throws SQLException {
 
+        if(!data.isEmpty()) {
+            Connection conn = null;
+            PreparedStatement stm = null;
+
+            String insertCount = "INSERT INTO tweet_counts (date, count, pos, neg, film_id) VALUES";
+            String insertCountry = "INSERT INTO tweets_countries (tweet_count_id, country_id, count) VALUES";
+
+            try {
+                conn = dataSource.getConnection();
+                conn.setAutoCommit(false);
+
+                for (TweetCount tw: data) {
+
+                    String countAux = new StringBuilder().append(insertCount).append(" (\'").append(tw.getDate().toString()).append("\', ").append(tw.getCount()).append(", ").append(tw.getPos()).append(", ").append(tw.getNeg()).append(", ").append(tw.getFilm_id()).append(")").toString();
+
+                    stm = conn.prepareStatement(countAux, Statement.RETURN_GENERATED_KEYS);
+                    int updatedRowsCount = stm.executeUpdate();
+
+                    if(updatedRowsCount > 0) {
+
+                        int countKey = -1;
+
+                        try (ResultSet keySet = stm.getGeneratedKeys()) {
+                            keySet.next();
+                            countKey = keySet.getInt(1);
+                            keySet.close();
+                        }
+
+                        stm.close(); //No necesita mas ese statement
+
+                        if(countKey >= 0) {
+
+                            ArrayList<CountryCount> countryCounts = tw.getCountryCounts();
+
+                            StringBuilder queryValues = new StringBuilder();
+                            queryValues.ensureCapacity(1200);
+
+                            for(CountryCount cc: countryCounts) {
+
+                                if(queryValues.length() == 0) {
+                                    queryValues.append(" (").append(countKey).append(", \'").append(cc.getId()).append("\', ").append(cc.getCount()).append(")");
+                                } else if (queryValues.length() < 1000) {
+                                    queryValues.append(", (").append(countKey).append(", \'").append(cc.getId()).append("\', ").append(cc.getCount()).append(")");
+                                } else {
+                                    //Manda a la BD los datos que tiene por ahora
+                                    stm = conn.prepareStatement(insertCountry + queryValues.toString());
+                                    stm.executeUpdate();
+                                    if(!stm.isClosed()) stm.close();
+
+                                    //Vacia los valores de la query
+                                    queryValues = new StringBuilder();
+                                    queryValues.ensureCapacity(1200);
+                                }
+                            }
+
+                            if(queryValues.length() > 0) {
+                                stm = conn.prepareStatement(insertCountry + queryValues.toString());
+                                stm.executeUpdate();
+                                if(!stm.isClosed()) stm.close();
+
+                            }
+                        }
+                    }
+
+                    conn.commit();
+                }
+
+                conn.setAutoCommit(true);
+
+            } catch (SQLException e) {
+                throw e;
+            } finally {
+                if(stm != null && !stm.isClosed()) stm.close();
+
+                if(conn != null && !conn.isClosed()) conn.close();
+            }
+
+        }
+
+        return 0;
+    }
+
+    /*
+    @Override
+    public int writeData(List<TweetCount> data) throws SQLException {
+
         //La query debe ser algo como
         // INSERT INTO tweet_counts (date, count, film_id)
         // VALUES ('YYYY-MM-DD', 100, 1), ('YYYY-MM-DD', 200, 1), (otra fila), (otra fila)
@@ -235,8 +322,48 @@ public class MySqlConnection implements SqlConnection {
 
     }
 
+    */
+
     @Override
     public int writeSentiment(List<TweetsSentiments> data) throws SQLException {
         return 0;
     }
+
+    @Override
+    public ArrayList<String> getCountryCodes() throws SQLException {
+        Connection conn = null;
+        PreparedStatement stm = null;
+        ResultSet rs = null;
+
+        ArrayList<String> countryCodes = new ArrayList<String>();
+
+        System.out.print("Obteniendo Films \n\n");
+
+        try {
+            conn = dataSource.getConnection();
+
+            stm = conn.prepareStatement("SELECT id FROM countries");
+            rs = stm.executeQuery();
+
+            while(rs.next()) {
+                String code = rs.getString("id");
+                countryCodes.add(code);
+            }
+
+
+        } catch (SQLException e) {
+            throw e;
+        } finally {
+            if(rs != null && !rs.isClosed()) rs.close();
+
+            if(stm != null && !stm.isClosed()) stm.close();
+
+            if(conn != null && !conn.isClosed()) conn.close();
+        }
+
+
+        return countryCodes;
+    }
+
+
 }

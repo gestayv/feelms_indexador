@@ -3,6 +3,7 @@ package db;
 import tweets.TweetLoader;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Date;
 
 /**
@@ -15,17 +16,29 @@ public class TweetCount {
     private int count;
     private int pos;
     private int neg;
+    private ArrayList<CountryCount> countryCounts;
 
     private TweetCount() {
 
     }
 
+    /*
     public TweetCount(int film_id, LocalDate date, int count, int pos, int neg) {
         this.film_id = film_id;
         this.date = date;
         this.count = count;
         this.pos = pos;
         this.neg = neg;
+    }
+    */
+
+    public TweetCount(int film_id, LocalDate date, int count, int pos, int neg, ArrayList<CountryCount> countryCounts) {
+        this.film_id = film_id;
+        this.date = date;
+        this.count = count;
+        this.pos = pos;
+        this.neg = neg;
+        this.countryCounts = countryCounts;
     }
 
     public int getFilm_id() {
@@ -66,5 +79,13 @@ public class TweetCount {
 
     public void setNeg(int neg) {
         this.neg = neg;
+    }
+
+    public ArrayList<CountryCount> getCountryCounts() {
+        return countryCounts;
+    }
+
+    public void setCountryCounts(ArrayList<CountryCount> countryCounts) {
+        this.countryCounts = countryCounts;
     }
 }

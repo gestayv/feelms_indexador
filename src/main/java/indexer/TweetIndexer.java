@@ -33,6 +33,7 @@ public class TweetIndexer {
     private SqlConnection sqlConn;
     private Neo4jConnection neo4jConnection;
     private SentimentAnalyzer sentimentAnalyzer;
+    //private ArrayList<String> countryCodes;
 
     private TweetIndexer() {
 
@@ -75,6 +76,15 @@ public class TweetIndexer {
 
 
         try {
+
+
+            //Obtener codigos de pais
+            //countryCodes = sqlConn.getCountryCodes();
+
+            //Tamaño para hashmaps adelante
+            //Double auxCountryHashSize = countryCodes.size() / 0.75;
+            //int countryHashSize = auxCountryHashSize.intValue() + 1;
+            int countryHashSize = 100;
 
             indexWriter = new IndexWriter(dir, iwc);
 
@@ -187,7 +197,9 @@ public class TweetIndexer {
                             int tweetNeg = 0;
                             //int tweetNeut = 0;
 
-                            //Para ver tweets de usuarios en particular y analisis de sentimientos de tweets
+                            Map<String, Integer> countryCountsMap = new HashMap<String, Integer>(countryHashSize);
+
+                            //Para ver tweets de usuarios en particular, conteos por pais y analisis de sentimientos de tweets
                             TopDocs topDocs = indexSearcher.search(secondQuery, count);
                             for (ScoreDoc scoreDoc: topDocs.scoreDocs) {
                                 Document doc = indexSearcher.doc(scoreDoc.doc);
@@ -228,12 +240,28 @@ public class TweetIndexer {
 
                                     ready.add(user);
                                 }
+
+                                //Conteo por paises
+                                String doc_country = doc.get("country_code");
+                                if(!doc_country.equals("none")) {
+                                    if(countryCountsMap.containsKey(doc_country)) {
+                                        countryCountsMap.put(doc_country, countryCountsMap.get(doc_country) + 1);
+                                    } else {
+                                        countryCountsMap.put(doc_country, 1);
+                                    }
+                                }
+                            }
+
+                            //Crea los conteos de paises para ese dia
+                            ArrayList<CountryCount> countryCounts = new ArrayList<CountryCount>();
+                            for (Map.Entry<String, Integer> entry : countryCountsMap.entrySet()) {
+                                countryCounts.add(new CountryCount(entry.getKey(), entry.getValue()));
                             }
 
 
                             //Agrega los porcentajes de tweets segun analisis de sentimientos y conteos
 
-                            tweetCounts.add(new TweetCount(film.getId(), beginPoint, count, tweetPos, tweetNeg));
+                            tweetCounts.add(new TweetCount(film.getId(), beginPoint, count, tweetPos, tweetNeg, countryCounts));
 
                             //tweetsSentiments.add(new TweetsSentiments(film.getId(), beginPoint, tweetPos / count, tweetNeg / count));
 
