@@ -243,7 +243,7 @@ public class TweetIndexer {
 
                                 //Conteo por paises
                                 String doc_country = doc.get("country_code");
-                                if(!doc_country.equals("null")) {
+                                if(!doc_country.equals("none")) {
                                     if(countryCountsMap.containsKey(doc_country)) {
                                         countryCountsMap.put(doc_country, countryCountsMap.get(doc_country) + 1);
                                     } else {

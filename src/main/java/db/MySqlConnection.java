@@ -173,8 +173,8 @@ public class MySqlConnection implements SqlConnection {
             Connection conn = null;
             PreparedStatement stm = null;
 
-            String insertCount = "INSERT INTO tweet_counts (date, count, film_id) VALUES";
-            String insertCountry = "INSERT INTO tweet_countries (tweet_count_id, country_id, count) VALUES";
+            String insertCount = "INSERT INTO tweet_counts (date, count, pos, neg, film_id) VALUES";
+            String insertCountry = "INSERT INTO tweets_countries (tweet_count_id, country_id, count) VALUES";
 
             try {
                 conn = dataSource.getConnection();
@@ -182,7 +182,7 @@ public class MySqlConnection implements SqlConnection {
 
                 for (TweetCount tw: data) {
 
-                    String countAux = new StringBuilder().append(insertCount).append(" (\'").append(tw.getDate().toString()).append("\', ").append(tw.getCount()).append(", ").append(tw.getFilm_id()).append(")").toString();
+                    String countAux = new StringBuilder().append(insertCount).append(" (\'").append(tw.getDate().toString()).append("\', ").append(tw.getCount()).append(", ").append(tw.getPos()).append(", ").append(tw.getNeg()).append(", ").append(tw.getFilm_id()).append(")").toString();
 
                     stm = conn.prepareStatement(countAux, Statement.RETURN_GENERATED_KEYS);
                     int updatedRowsCount = stm.executeUpdate();

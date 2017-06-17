@@ -59,7 +59,7 @@ public class MongoLoader implements TweetLoader{
             tweet.add(new StoredField("rt_count", tw.getRt_count()));
             tweet.add(new TextField("fecha", LocalDate.parse(tw.getFecha()).format(DateTimeFormatter.BASIC_ISO_DATE), Store.YES));
             tweet.add(new TextField("hashtags", tw.getHashtag(), Store.NO));
-            tweet.add(new TextField("country_code", tw.getPais(), Store.NO));
+            tweet.add(new TextField("country_code", tw.getPais(), Store.YES));
             
             //  Se agrega el documento a un listado
             docs.add(tweet);
